@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>USB Device Info</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+    <script src="jquery/jquery-3.1.0.min.js" type="text/javascript"></script>
+    <script src="jquery/blob.js" type="text/javascript"></script>
+    <script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <button id="mat_findDevice" class="btn-info">Find Devices</button>
+
+    <div>
+      <ul id="deviceList">
+        <li class="row text-center bg">
+          <span class="col-xs-3">
+            设备名称
+          </span>
+          <span class="col-xs-5">
+            序列号
+          </span>
+          <span class="col-xs-2">
+            操作
+          </span>
+        </li>
+      </ul>
+    </div>
+    <script src="./lib/tcp.js"></script>
+    <script src="./lib/socketService.js"></script>
+    <script src="index.js"></script>
+    <script src="./lib/pushFile.js"></script>
+  </body>
+</html>

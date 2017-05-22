@@ -1,0 +1,31 @@
+{
+  "name": "Device",
+  "version": "0.6",
+  "description": "This application displays detailed technical information about USB devices that are connected to your computer.",
+  "manifest_version": 2,
+  "minimum_chrome_version": "40.0.2213.0",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "permissions": ["usb",{"fileSystem": ["write", "directory"]},{
+    "socket": ["tcp-connect:*:*"]} ],
+  "commands": {},
+  "icons": {
+    "128": "assets/ic_android_pressed.png"
+  },
+  "requirements": {
+    "3D": {
+      "features": [ "webgl" ]
+    }
+  },
+  "sockets": {
+    "tcp": {
+      "connect": "*"
+    },
+    "tcpServer": {
+      "listen": "*"
+    }
+  }
+}
