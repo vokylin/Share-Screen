@@ -18,7 +18,13 @@ h3 {
 p {
   margin: 8px;
 }
-
+.container{
+  padding:10px;
+}
+#deviceList{
+  margin-bottom:10px;
+}
+/*screen*/
 #device-info {
   margin-left: 216px;
 }
@@ -26,7 +32,6 @@ p {
 .left-panel {
   position: absolute;
 }
-
 #device-selector {
   width: 200px;
   height: 283px;
@@ -35,6 +40,9 @@ p {
 #deviceList li{
   list-style: none;
   border-bottom:1px solid #eee;
+}
+#deviceList li:nth-child(even){
+  background: #ddd;
 }
 .mat_btn{
   position: relative;
@@ -46,7 +54,7 @@ p {
   padding:14px 12px;
 }
 .bg{
-  background: #eeeeee;
+  background: #aaa;
   line-height: 32px;
  }
 .row{
@@ -54,11 +62,17 @@ p {
 }
 .col-xs-2,.col-xs-3,.col-xs-5{
   padding:10px;
+  overflow-wrap: break-word;
+}
+#deviceList .col-xs-5{
   border-left:1px solid #eee;
   border-right:1px solid #eee;
 }
+#deviceList li.bg .col-xs-5{
+  border:none;
+}
 .col-xs-2.btn{
-  margin:3px 10px;
+  margin-top:3px;
   padding:6px;
 }
 
