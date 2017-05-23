@@ -1,6 +1,7 @@
 var real = {width:1080,height:1920};
 var ratioWidth = 1,ratioHeight = 1;
 var canvas = $('#mat_canvas');
+var socketIds = {};
 function ratio(real) {
     ratioWidth = real.width/canvas.width();
     ratioHeight = real.height/canvas.height();
@@ -54,17 +55,24 @@ function mousemoveListener(socketId) {
 
 var client,deviceObj;
 
+
+
+
+
 $(window).ready(function () {
     deviceObj = JSON.parse(chrome.app.window.current().id)
     client = new Tcp();
     var device = deviceObj.device;
+    sendCommands('client',"shell:find /data/local/tmp/minitouch",deviceObj.serialNumber,()=>{
+        console.log('findMinitouch'+client.socketId);
+        socketIds['findMinitouch'] = client.socketId;
+    });
     minicapSocket(device);
     minitouchSocket(device);
 
-
 });
 
-var socketIds = {};
+
 function closeSocket() {
     for (id in socketIds) {
         console.log('close socket:', socketIds[id]);
@@ -106,6 +114,27 @@ function minicapSocket(device) {
 
 chrome.sockets.tcp.onReceive.addListener(function (message) {
     if (message.socketId) {
+        if(message.socketId == socketIds['findMinitouch']){
+            ab2str(message.data, function (e) {
+                console.log('返回值'+e)
+                if (e.startsWith('OKAY')) {
+                    return null;
+                }else if(e.indexOf('No such file') != -1){
+                    //弹出提示信息
+                    var opt = {
+                        type: "basic",
+                        iconUrl: '/assets/ic_android_pressed.png',
+                        title: '设备异常',
+                        message:"无法正常启动设备，请尝试重新连接设备或重新打开应用...",
+                    }
+                    chrome.notifications.create(opt,()=>{})
+
+                }
+            })
+        }
+
+
+
         if (socketIds['minicap'] && (socketIds['minicap'] == message.socketId)) {
             tryRead(message);//minicap receive callback
         }else if (socketIds['minitouch'] && (socketIds['minitouch'] == message.socketId)) {

@@ -19,22 +19,22 @@ function closeSocket(screenWin) {
 
 
 function createDeviceLi(device, fragment) {
-  var li = document.createElement('li');
-  var liContnt = "<span class='col-xs-3 "+(device.productName?"text-danger":"") +"'>" + (device.productName||"无法获取") + '</span>' + "<span class='col-xs-5 "+(device.productName?"text-danger":"")+"'>" + (device.serialNumber||"无法获取") + '</span>';
-  $(li).attr('id', device.device + device.serialNumber);
-  $(li).addClass('row')
-  var btn = document.createElement('button');
-  btn.innerHTML = 'view';
-  $(btn).addClass('btn btn-success col-xs-2 col-xs-offset-1');
-  // $(btn).attr('disabled','disabled');
-  li.innerHTML = liContnt;
-  li.appendChild(btn);
-  fragment.appendChild(li);
+    var li = document.createElement('li');
+    var liContnt = "<span class='col-xs-3'>" + device.productName + '</span>' + "<span class='col-xs-5'>" + device.serialNumber + '</span>';
+    $(li).attr('id', device.device + device.serialNumber);
+    $(li).addClass('row')
+    var btn = document.createElement('button');
+    btn.innerHTML = 'preparing';
+    $(btn).addClass('btn btn-warning col-xs-2');
+     $(btn).attr('disabled','disabled');
+    li.innerHTML = liContnt;
+    li.appendChild(btn);
+    fragment.appendChild(li);
     setTimeout(function(){
         sendCommands('client', "shell:wm size", device.serialNumber, ()=> {
             socketIds[client.socketId] = device.device + device.serialNumber;
         });
-    },3000)
+    },2000)
     /*
      * 刚插入手机的时候还需要检测是否有文件，如果没有则安装
      * 安装前需要获取手机的框架，还有sdk版本，再然后推两个文件
@@ -124,9 +124,19 @@ function appendLi(devicesArr) {
             devices[item.device + item.serialNumber]['capPort'] = 3131 + item.device;
             devices[item.device + item.serialNumber]['touchPort'] = 1111 + item.device
             createDeviceLi(devices[item.device + item.serialNumber], fragment);
+            //设置定时器 10s之后检查是否文件推送完成
+            setTimeout(function () {
+//改变按钮
+                $('#'+item.device+item.serialNumber).find('button').html('view').removeAttr('disabled').removeClass('btn-warning').addClass('btn-success')
+
+            },6000);
+
+
+
+
+
             //检查ABI
             console.log('这次手机的serial:'+item.serialNumber);
-            if(index ==0){
                 sendCommands('client',"shell:getprop ro.product.cpu.abi | tr -d '\r'",item.serialNumber,()=>{
                     //console.log('查询ABI')
                     console.log('ABI'+client.socketId);
@@ -134,12 +144,11 @@ function appendLi(devicesArr) {
                     socketIds[client.socketId] = item.device+item.serialNumber;
                     console.info(new Date())
                     var t1 = setTimeout(()=>{
-                        if(tmpRes.startsWith('arm')){
+                        if(tmpRes.startsWith('arm')||tmpRes.startsWith('x86')){
                             var regRN = /\r\n/g;
                             tmpRes = tmpRes.replace(regRN,"");
                             devices[item.device+item.serialNumber].ABI = tmpRes;
                             sendCommands('client',"shell:getprop ro.build.version.sdk | tr -d '\r'",item.serialNumber,()=>{
-                                //console.log('查询SDK')
                                 socketIds['searchId'] = client.socketId;
                                 console.log('SDK'+client.socketId);
                                 socketIds[client.socketId] = item.device+item.serialNumber;
@@ -171,7 +180,7 @@ function appendLi(devicesArr) {
                         tmpRes = '';
                     },3000)
                 });
-            }
+
 
 
         } else {
