@@ -20,12 +20,12 @@ function closeSocket(screenWin) {
 
 function createDeviceLi(device, fragment) {
     var li = document.createElement('li');
-    var liContnt = "<span class='col-xs-3'>" + device.productName + '</span>' + "<span class='col-xs-5'>" + device.serialNumber + '</span>';
+  var liContnt = "<span class='col-xs-3 "+(device.productName?"text-danger":"") +"'>" + (device.productName||"无法获取") + '</span>' + "<span class='col-xs-5 "+(device.productName?"text-danger":"")+"'>" + (device.serialNumber||"无法获取") + '</span>';
     $(li).attr('id', device.device + device.serialNumber);
     $(li).addClass('row')
     var btn = document.createElement('button');
     btn.innerHTML = 'preparing';
-    $(btn).addClass('btn btn-warning col-xs-2');
+    $(btn).addClass('btn btn-warning col-xs-2 col-xs-offset-1');
      $(btn).attr('disabled','disabled');
     li.innerHTML = liContnt;
     li.appendChild(btn);
