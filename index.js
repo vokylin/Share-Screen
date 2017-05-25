@@ -5,6 +5,8 @@ var ul = $('#deviceList');
 var temp;
 var screenWidth = 371, screenHeight = 710;
 var client = new Tcp();
+var tips = "请先启动adb服务，再使用此应用:run '$adb start-server'"
+throwTip(tips,'info')
 
 function closeSocket(screenWin) {
     for (id in screenWin.contentWindow.socketIds) {
@@ -187,71 +189,70 @@ function appendLi(devicesArr) {
 
 //发送 adb devices 查询设备状态是否可用
 function adbDevices(devicesArr) {
+
     sendCommands('host',"host:devices",null,()=>{
         //console.log('查询SDK')
         console.log('devices-l:'+client.socketId);
         socketIds['findDevice'] = client.socketId;
         socketIds[client.socketId] = client.socketId
-        var t3 = setTimeout(function () {
-            console.log('tmpDevices:'+tmpDevices);
-            var arr = tmpDevices.split('\n');
-            debugger;
-            console.log('开始查询状态')
-            for(var i=0;i<arr.length;i++){
-                console.log('进入循环')
-                if(arr[i].indexOf(devicesArr[0].serialNumber)!=-1){
-                    if(arr[i].indexOf('device') !=-1){
-                        console.log('状态可用')
-                        //状态可用
-                        //设置定时器 6s之后检查是否文件推送完成
-                        appendLi(devicesArr);
-                        setTimeout(function () {
+            var t3 = setTimeout(function () {
+                console.log('tmpDevices:'+tmpDevices);
+                var arr = tmpDevices.split('\n');
+                debugger;
+                console.log('开始查询状态')
+                for(var i=0;i<arr.length;i++){
+                    console.log('进入循环')
+                    if(arr[i].indexOf(devicesArr[0].serialNumber)!=-1){
+                        if(arr[i].indexOf('device') !=-1){
+                            console.log('状态可用')
+                            //状态可用
+                            //设置定时器 6s之后检查是否文件推送完成
+                            appendLi(devicesArr);
+                            setTimeout(function () {
 //改变按钮
-                            $('#'+devicesArr[0].device+devicesArr[0].serialNumber).find('button').html('view').removeAttr('disabled').removeClass('btn-warning').addClass('btn-success')
+                                $('#'+devicesArr[0].device+devicesArr[0].serialNumber).find('button').html('view').removeAttr('disabled').removeClass('btn-warning').addClass('btn-success')
 
-                        },6000);
+                            },6000);
 
-                    }else if(arr[i].indexOf('unauthorized') !=-1){
-                        console.log('没授权')
-                        //设置定时器 6s之后检查是否文件推送完成
-                        var opt = {
-                            type: "basic",
-                            iconUrl: '/assets/ic_android_pressed.png',
-                            title: '请允许手机调试',
-                            message:"请点击允许USB调试,再尝试点击find devices...",
+                        }else if(arr[i].indexOf('unauthorized') !=-1){
+                            console.log('没授权')
+                            //设置定时器 6s之后检查是否文件推送完成
+                            var opt = {
+                                type: "basic",
+                                iconUrl: '/assets/ic_android_pressed.png',
+                                title: '请允许手机调试',
+                                message:"请点击允许USB调试,再尝试点击find devices...",
+                            }
+                            chrome.notifications.create(opt,()=>{})
+
+                        }else if(arr[i].indexOf('offline') !=-1){
+                            console.log('状态离线')
+                            //设置定时器 6s之后检查是否文件推送完成
+                            var opt = {
+                                type: "basic",
+                                iconUrl: '/assets/ic_android_pressed.png',
+                                title: '手机状态不可用',
+                                message:"adb检查手机状态为offline, 请检查是否已经允许USB调试或重启手机",
+                            }
+                            chrome.notifications.create(opt,()=>{})
                         }
-                        chrome.notifications.create(opt,()=>{})
-
-                    }else if(arr[i].indexOf('offline') !=-1){
-                        console.log('状态离线')
-                        //设置定时器 6s之后检查是否文件推送完成
-                        var opt = {
-                            type: "basic",
-                            iconUrl: '/assets/ic_android_pressed.png',
-                            title: '手机状态不可用',
-                            message:"adb检查手机状态为offline, 请检查是否已经允许USB调试或重启手机",
-                        }
-                        chrome.notifications.create(opt,()=>{})
+                        break;
                     }
-                    return;
                 }
-            }
-            if(i==arr.length){
-                console.log('找不到手机')
-                var opt = {
-                    type: "basic",
-                    iconUrl: '/assets/ic_android_pressed.png',
-                    title: '手机不可用',
-                    message:"adb无法正常连接手机，请检查驱动是否安装成功",
+                if(i==arr.length){
+                    console.log('找不到手机')
+                    var opt = {
+                        type: "basic",
+                        iconUrl: '/assets/ic_android_pressed.png',
+                        title: '手机不可用',
+                        message:"adb无法正常连接手机，请检查驱动是否安装成功",
+                    }
+                    chrome.notifications.create(opt,()=>{})
                 }
-                chrome.notifications.create(opt,()=>{})
-            }
-            tmpDevices = '';
+                tmpDevices = '';
 
-        },1500)
-
+            },1500)
     });
-
 }
 $('#mat_findDevice').click(() => {
     chrome.usb.getUserSelectedDevices({
@@ -259,7 +260,9 @@ $('#mat_findDevice').click(() => {
         filters: [{interfaceClass: 255, interfaceSubclass: 66, interfaceProtocol: 1}]
     }, function (devicesArr) {
         console.log(devicesArr);
-        adbDevices(devicesArr)
+        if(devicesArr.length >0){
+            adbDevices(devicesArr)
+        }
 
     });
 
