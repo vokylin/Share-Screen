@@ -84,7 +84,7 @@ function createDeviceLi(device, fragment) {
 
     })
 }
-var tmpRes = '';
+var tmpRes = '',tmpDevices = '';
 chrome.sockets.tcp.onReceive.addListener(function (msg) {
     if (socketIds[msg.socketId]) {
         debugger;
@@ -92,11 +92,16 @@ chrome.sockets.tcp.onReceive.addListener(function (msg) {
            if(socketIds['searchId'] &&msg.socketId == socketIds['searchId']){
                 debugger;
                e = e.trim();
-               console.log(msg.socketId+':::::'+e);
                if(e != 'OKAY'){
                    tmpRes = tmpRes+e;
                }
-            }
+            }else if(socketIds['findDevice'] &&msg.socketId == socketIds['findDevice']){
+               e = e.trim();
+               console.log(msg.socketId+':::::'+e);
+               if(e != 'OKAY'){
+                   tmpDevices = tmpDevices+e;
+               }
+           }
             debugger;
             console.log('每次的返回值:'+e)
             if (e.startsWith('OKAY')) {
@@ -124,16 +129,6 @@ function appendLi(devicesArr) {
             devices[item.device + item.serialNumber]['capPort'] = 3131 + item.device;
             devices[item.device + item.serialNumber]['touchPort'] = 1111 + item.device
             createDeviceLi(devices[item.device + item.serialNumber], fragment);
-            //设置定时器 10s之后检查是否文件推送完成
-            setTimeout(function () {
-//改变按钮
-                $('#'+item.device+item.serialNumber).find('button').html('view').removeAttr('disabled').removeClass('btn-warning').addClass('btn-success')
-
-            },6000);
-
-
-
-
 
             //检查ABI
             console.log('这次手机的serial:'+item.serialNumber);
@@ -142,7 +137,6 @@ function appendLi(devicesArr) {
                     console.log('ABI'+client.socketId);
                     socketIds['searchId'] = client.socketId;
                     socketIds[client.socketId] = item.device+item.serialNumber;
-                    console.info(new Date())
                     var t1 = setTimeout(()=>{
                         if(tmpRes.startsWith('arm')||tmpRes.startsWith('x86')){
                             var regRN = /\r\n/g;
@@ -189,20 +183,90 @@ function appendLi(devicesArr) {
 
     });
     ul.append(fragment);
-
 }
 
+//发送 adb devices 查询设备状态是否可用
+function adbDevices(devicesArr) {
+    sendCommands('host',"host:devices",null,()=>{
+        //console.log('查询SDK')
+        console.log('devices-l:'+client.socketId);
+        socketIds['findDevice'] = client.socketId;
+        socketIds[client.socketId] = client.socketId
+        var t3 = setTimeout(function () {
+            console.log('tmpDevices:'+tmpDevices);
+            var arr = tmpDevices.split('\n');
+            debugger;
+            console.log('开始查询状态')
+            for(var i=0;i<arr.length;i++){
+                console.log('进入循环')
+                if(arr[i].indexOf(devicesArr[0].serialNumber)!=-1){
+                    if(arr[i].indexOf('device') !=-1){
+                        console.log('状态可用')
+                        //状态可用
+                        //设置定时器 6s之后检查是否文件推送完成
+                        appendLi(devicesArr);
+                        setTimeout(function () {
+//改变按钮
+                            $('#'+devicesArr[0].device+devicesArr[0].serialNumber).find('button').html('view').removeAttr('disabled').removeClass('btn-warning').addClass('btn-success')
 
+                        },6000);
+
+                    }else if(arr[i].indexOf('unauthorized') !=-1){
+                        console.log('没授权')
+                        //设置定时器 6s之后检查是否文件推送完成
+                        var opt = {
+                            type: "basic",
+                            iconUrl: '/assets/ic_android_pressed.png',
+                            title: '请允许手机调试',
+                            message:"请点击允许USB调试,再尝试点击find devices...",
+                        }
+                        chrome.notifications.create(opt,()=>{})
+
+                    }else if(arr[i].indexOf('offline') !=-1){
+                        console.log('状态离线')
+                        //设置定时器 6s之后检查是否文件推送完成
+                        var opt = {
+                            type: "basic",
+                            iconUrl: '/assets/ic_android_pressed.png',
+                            title: '手机状态不可用',
+                            message:"adb检查手机状态为offline, 请检查是否已经允许USB调试或重启手机",
+                        }
+                        chrome.notifications.create(opt,()=>{})
+                    }
+                    return;
+                }
+            }
+            if(i==arr.length){
+                console.log('找不到手机')
+                var opt = {
+                    type: "basic",
+                    iconUrl: '/assets/ic_android_pressed.png',
+                    title: '手机不可用',
+                    message:"adb无法正常连接手机，请检查驱动是否安装成功",
+                }
+                chrome.notifications.create(opt,()=>{})
+            }
+            tmpDevices = '';
+
+        },1500)
+
+    });
+
+}
 $('#mat_findDevice').click(() => {
     chrome.usb.getUserSelectedDevices({
         'multiple': false,
         filters: [{interfaceClass: 255, interfaceSubclass: 66, interfaceProtocol: 1}]
     }, function (devicesArr) {
-        appendLi(devicesArr)
+        console.log(devicesArr);
+        adbDevices(devicesArr)
 
     });
+
 });
 
+
+/*
 
 chrome.usb.getDevices({}, (devicesArr)=> {
     if (chrome.runtime.lastError != undefined) {
@@ -224,6 +288,7 @@ if (chrome.usb.onDeviceAdded) {
         devices[device.device + device.serialNumber] = device;
     });
 }
+*/
 
 if (chrome.usb.onDeviceRemoved) {
     chrome.usb.onDeviceRemoved.addListener(function (device) {
