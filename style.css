@@ -60,7 +60,7 @@ p {
 .row{
   margin: 0;
 }
-.col-xs-2,.col-xs-3,.col-xs-5{
+#deviceList .col-xs-2,#deviceList .col-xs-3,#deviceList .col-xs-5{
   padding:10px;
   overflow-wrap: break-word;
 }
@@ -75,4 +75,6 @@ p {
   margin-top:3px;
   padding:6px;
 }
-
+.alert{
+  margin-bottom:0;
+}
