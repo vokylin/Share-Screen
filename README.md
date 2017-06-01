@@ -1,5 +1,5 @@
 # SS(Share Screen)
-## 基于ADB开发,沿用STF项目的minicap和minitouch工具,实现Android手机屏幕共享及远程控制的一款chrome app.
+### 基于ADB开发,沿用STF项目的minicap和minitouch工具,实现Android手机屏幕共享及远程控制的一款chrome app.
 # 使用方式
 1. 下载并安装此应用到chrome的扩展程序中
 2. 启动adb,打开命令行输入
