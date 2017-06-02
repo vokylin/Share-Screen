@@ -54,11 +54,6 @@ function mousemoveListener(socketId) {
 }
 
 var client,deviceObj;
-
-
-
-
-
 $(window).ready(function () {
     deviceObj = JSON.parse(chrome.app.window.current().id)
     client = new Tcp();
@@ -128,6 +123,7 @@ chrome.sockets.tcp.onReceive.addListener(function (message) {
                         message:"无法正常启动设备，请尝试重新连接设备或重新打开应用...",
                     }
                     chrome.notifications.create(opt,()=>{})
+                    //加哭脸
 
                 }
             })
@@ -340,4 +336,14 @@ document.getElementById('mat_tasks').addEventListener('click',function(){
 
     });
 })
+
+
+/*监听拔调设备*/
+if (chrome.usb.onDeviceRemoved) {
+    chrome.usb.onDeviceRemoved.addListener(function (device) {
+        if((device.serialNumber+device.device) == (deviceObj.serialNumber+deviceObj.device)){
+            chrome.app.window.current().close();
+        }
+    });
+}
 

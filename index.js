@@ -284,7 +284,7 @@ chrome.sockets.tcp.onReceive.addListener(function (msg) {
             } else if (e.indexOf('Publishing virtual display') != -1) {
                 sendCommands('host', "host-serial:" + devices[socketIds[msg.socketId]].serialNumber + ":forward:tcp:" + devices[socketIds[msg.socketId]].capPort + ";localabstract:minicap", devices[socketIds[msg.socketId]].serialNumber, ()=> {
                 });
-            } else if (e.indexOf('hard-limiting maximum') != -1) {
+            } else if (e.indexOf('touch device') != -1) {
                 sendCommands('host', "host-serial:" + devices[socketIds[msg.socketId]].serialNumber + ":forward:tcp:" + devices[socketIds[msg.socketId]].touchPort + ";localabstract:minitouch", devices[socketIds[msg.socketId]].serialNumber, ()=> {
                 });
             }
