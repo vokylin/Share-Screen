@@ -71,7 +71,7 @@ p {
 #deviceList li.bg .col-xs-5{
   border:none;
 }
-.col-xs-2.btn{
+#deviceList .col-xs-2.btn{
   margin-top:3px;
   padding:6px;
 }
