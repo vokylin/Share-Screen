@@ -78,3 +78,11 @@ p {
 .alert{
   margin-bottom:0;
 }
+#mat_error{
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 660px;
+  background: url("assets/error.png") no-repeat;
+  background-size: cover;
+}

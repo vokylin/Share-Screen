@@ -58,9 +58,9 @@ $(window).ready(function () {
     deviceObj = JSON.parse(chrome.app.window.current().id)
     client = new Tcp();
     var device = deviceObj.device;
-    sendCommands('client',"shell:find /data/local/tmp/minitouch",deviceObj.serialNumber,()=>{
-        console.log('findMinitouch'+client.socketId);
-        socketIds['findMinitouch'] = client.socketId;
+    sendCommands('client',"shell:find /data/local/tmp/minicap",deviceObj.serialNumber,()=>{
+        console.log('findMinicap'+client.socketId);
+        socketIds['findMinicap'] = client.socketId;
     });
     minicapSocket(device);
     minitouchSocket(device);
@@ -109,7 +109,7 @@ function minicapSocket(device) {
 
 chrome.sockets.tcp.onReceive.addListener(function (message) {
     if (message.socketId) {
-        if(message.socketId == socketIds['findMinitouch']){
+        if(message.socketId == socketIds['findMinicap']){
             ab2str(message.data, function (e) {
                 console.log('返回值'+e)
                 if (e.startsWith('OKAY')) {
@@ -118,12 +118,15 @@ chrome.sockets.tcp.onReceive.addListener(function (message) {
                     //弹出提示信息
                     var opt = {
                         type: "basic",
-                        iconUrl: '/assets/ic_android_pressed.png',
+                        iconUrl: '/assets/ss_icon11.png',
                         title: '设备异常',
                         message:"无法正常启动设备，请尝试重新连接设备或重新打开应用...",
                     }
                     chrome.notifications.create(opt,()=>{})
                     //加哭脸
+                    var div = document.createElement('div');
+                    $(div).attr('id','mat_error');
+                    $('body').append(div);
 
                 }
             })
